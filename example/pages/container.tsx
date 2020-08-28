@@ -37,7 +37,7 @@ let Container: FC<{ router: GenRouterTypeTree["next"] }> = React.memo((props) =>
   return (
     <div className={cx(fullscreen, row, styleContainer)}>
       <DocSidebar
-        title="Workflow"
+        title="Ruled validator"
         currentPath={props.router.name}
         onSwitch={(item) => {
           onSwitchPage(item.path);

@@ -1,28 +1,10 @@
-## Workflow
+## Ruled Validator
 
-> A project template based on TypeScript, React, immer, emotion, rex, ruled-router...
+> JSON based validator engine like https://ant.design/components/form/#Rule
 
 ### Usage
 
-Dev:
-
-```bash
-yarn dll
-yarn dev
-```
-
-Compile library:
-
-```bash
-yarn compile
-```
-
-Release:
-
-```bash
-yarn release
-# yarn serve
-```
+_TODO_
 
 ### Workflow
 
