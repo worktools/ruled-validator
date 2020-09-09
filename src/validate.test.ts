@@ -1,4 +1,4 @@
-import { ruledValidate, RuledRules } from "./validate";
+import { ruledValidate, RuledRules, registerRuledValidatorRule } from "./validate";
 
 test("required data", () => {
   let requiredRules: RuledRules = [{ type: "required", failText: "required" }];
@@ -138,4 +138,33 @@ test("quick usages", () => {
 
   expect(ruledValidate({}, [{ type: "object", failText: "required object" }])).toBe(undefined);
   expect(ruledValidate(null, [{ type: "object", failText: "required object" }])).toBe("required object");
+});
+
+test("registered", () => {
+  registerRuledValidatorRule("email", (x: string, options) => {
+    if (typeof x !== "string") {
+      return false;
+    }
+    return /^\w+@\w+\.\w+$/.test(x);
+  });
+  registerRuledValidatorRule("even-number", (x: number, options) => {
+    if (typeof x !== "number") {
+      return false;
+    }
+    return x % 2 === 0;
+  });
+
+  let emailRule: RuledRules = [{ type: "registered", name: "email", failText: "invalid email" }];
+  let stringEmailRule: RuledRules = [{ type: "string", failText: "required string", next: [{ type: "registered", name: "email", failText: "invalid email" }] }];
+
+  expect(ruledValidate("x", emailRule)).toBe("invalid email");
+  expect(ruledValidate("x@a.b", emailRule)).toBe(undefined);
+
+  expect(ruledValidate(1, stringEmailRule)).toBe("required string");
+  expect(ruledValidate("x", stringEmailRule)).toBe("invalid email");
+  expect(ruledValidate("x@a.b", stringEmailRule)).toBe(undefined);
+
+  let evenRule: RuledRules = [{ type: "number", failText: "required number", next: [{ type: "registered", name: "even-number", failText: "not even" }] }];
+  expect(ruledValidate(1, evenRule)).toBe("not even");
+  expect(ruledValidate(2, evenRule)).toBe(undefined);
 });

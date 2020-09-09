@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "yarn jest --watch",
     "test": "yarn jest",
-    "compile": "tsc -d --project tsconfig-compile.json --outDir lib/"
+    "compile": "rm -rfv lib/* && tsc -d --project tsconfig-compile.json --outDir lib/"
   },
   "keywords": [],
   "author": "jimengio",

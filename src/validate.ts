@@ -7,7 +7,7 @@ interface RuledRequired {
 interface RuledString {
   type: "string";
   failText: string;
-  next?: (RuledStringMinLength | RuledStringMaxLength | RuledStringRegex | RuledByFn<string>)[];
+  next?: (RuledStringMinLength | RuledStringMaxLength | RuledStringRegex | RuledRegistered | RuledByFn<string>)[];
 }
 
 interface RuledStringMaxLength {
@@ -31,7 +31,7 @@ interface RuledStringRegex {
 interface RuledArray {
   type: "array";
   failText: string;
-  next?: (RuledArrayMaxLength | RuledArrayMinLength | RuledByFn<any[]>)[];
+  next?: (RuledArrayMaxLength | RuledArrayMinLength | RuledRegistered | RuledByFn<any[]>)[];
 }
 
 interface RuledArrayMaxLength {
@@ -66,7 +66,7 @@ interface RuledNumberMin {
 interface RuledNumber {
   type: "number";
   failText: string;
-  next?: (RuledNumberMax | RuledNumberMin | RuledByFn<number>)[];
+  next?: (RuledNumberMax | RuledNumberMin | RuledRegistered | RuledByFn<number>)[];
 }
 
 interface RuledObject {
@@ -81,7 +81,14 @@ interface RuledByFn<T = any> {
   failText: string;
 }
 
-export type RuledRules = (RuledRequired | RuledByFn | RuledString | RuledNumber | RuledBoolean | RuledArray | RuledObject)[];
+interface RuledRegistered {
+  type: "registered";
+  name: string;
+  options?: any;
+  failText: string;
+}
+
+export type RuledRules = (RuledRequired | RuledByFn | RuledString | RuledNumber | RuledBoolean | RuledArray | RuledObject | RuledRegistered)[];
 
 let ruledValidateStringMaxLength = (x: string, rule: RuledStringMaxLength): string => {
   if (x.length > rule.n) {
@@ -124,6 +131,13 @@ let ruledValidateString = (x: any, rule: RuledString): string => {
         }
         case "regex": {
           let result = ruledValidateStringRegex(x, childRule);
+          if (result != null) {
+            return result;
+          }
+          break;
+        }
+        case "registered": {
+          let result = ruledValidateRegistered(x, childRule);
           if (result != null) {
             return result;
           }
@@ -172,6 +186,13 @@ let ruledValidateNumber = (x: string, rule: RuledNumber): string => {
         }
         case "min": {
           let result = ruledValidateNumberMin(x, childRule);
+          if (result != null) {
+            return result;
+          }
+          break;
+        }
+        case "registered": {
+          let result = ruledValidateRegistered(x, childRule);
           if (result != null) {
             return result;
           }
@@ -228,6 +249,13 @@ let ruledValidateArray = (x: string, rule: RuledArray): string => {
         }
         case "fn": {
           let result = ruledValidateFn(x, childRule);
+          if (result != null) {
+            return result;
+          }
+          break;
+        }
+        case "registered": {
+          let result = ruledValidateRegistered(x, childRule);
           if (result != null) {
             return result;
           }
@@ -331,6 +359,18 @@ let ruledValidateFn = (x: any, rule: RuledByFn): string => {
   }
 };
 
+let ruledValidateRegistered = (x: any, rule: RuledRegistered): string => {
+  let f = registeredRules[rule.name];
+  if (f == null) {
+    console.warn("Rule", rule);
+    throw new Error(`Unknown registered rule: ${rule.name}`);
+  }
+  let result = f(x, rule.options);
+  if (!result) {
+    return rule.failText;
+  }
+};
+
 export let ruledValidate = (x: any, rules: RuledRules) => {
   for (let idx in rules) {
     let rule = rules[idx];
@@ -384,6 +424,13 @@ export let ruledValidate = (x: any, rules: RuledRules) => {
         }
         break;
       }
+      case "registered": {
+        let result = ruledValidateRegistered(x, rule);
+        if (result != null) {
+          return result;
+        }
+        break;
+      }
       default:
         console.warn("Rule", rule);
         throw new Error("Unknown rule");
@@ -391,18 +438,11 @@ export let ruledValidate = (x: any, rules: RuledRules) => {
   }
 };
 
-let rule: RuledRequired = {
-  type: "required",
-  failText: "TODO",
-  next: [
-    {
-      type: "string",
-      failText: "TODO",
-      next: [
-        { type: "min-length", n: 2, failText: "TODO" },
-        { type: "max-length", n: 4, failText: "TODO" },
-        { type: "regex", regex: /\d+/, failText: "TODO" },
-      ],
-    },
-  ],
+let registeredRules: Record<string, (x: any, options: object) => boolean> = {};
+
+export let registerRuledValidatorRule = (name: string, f: (x: any, options: object) => boolean) => {
+  if (registeredRules[name] != null) {
+    console.warn("Overwriting rule", name, f);
+  }
+  registeredRules[name] = f;
 };
