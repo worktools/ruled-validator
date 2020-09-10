@@ -6,6 +6,8 @@ interface RuledRequired {
 
 interface RuledString {
   type: "string";
+  rejectEmpty?: boolean;
+  rejectBlank?: boolean;
   failText: string;
   next?: (RuledStringMinLength | RuledStringMaxLength | RuledStringRegex | RuledRegistered | RuledByFn<string>)[];
 }
@@ -30,6 +32,7 @@ interface RuledStringRegex {
 
 interface RuledArray {
   type: "array";
+  rejectEmpty?: boolean;
   failText: string;
   next?: (RuledArrayMaxLength | RuledArrayMinLength | RuledRegistered | RuledByFn<any[]>)[];
 }
@@ -111,6 +114,17 @@ let ruledValidateString = (x: any, rule: RuledString): string => {
   if (typeof x !== "string") {
     return rule.failText;
   }
+  if (rule.rejectEmpty) {
+    if (x === "") {
+      return rule.failText;
+    }
+  }
+  if (rule.rejectBlank) {
+    if (x.trim() === "") {
+      return rule.failText;
+    }
+  }
+
   if (rule.next != null) {
     for (let idx in rule.next) {
       let childRule = rule.next[idx];
@@ -228,6 +242,11 @@ let ruledValidateArrayMinLength = (x: any[], rule: RuledArrayMinLength): string 
 let ruledValidateArray = (x: string, rule: RuledArray): string => {
   if (!Array.isArray(x)) {
     return rule.failText;
+  }
+  if (rule.rejectEmpty) {
+    if (x.length === 0) {
+      return rule.failText;
+    }
   }
   if (rule.next != null) {
     for (let idx in rule.next) {

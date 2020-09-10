@@ -49,6 +49,8 @@ expect(ruledValidate("x", emailRule)).toBe("invalid email");
 expect(ruledValidate("x@a.b", emailRule)).toBe(undefined);
 ```
 
+To treat empty strings/arrays as null, use `rejectEmpty`(`""`, `[]`) or `rejectBlank`(e.g. `" "`).
+
 ### Workflow
 
 https://github.com/jimengio/ts-workflow

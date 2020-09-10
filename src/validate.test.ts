@@ -168,3 +168,27 @@ test("registered", () => {
   expect(ruledValidate(1, evenRule)).toBe("not even");
   expect(ruledValidate(2, evenRule)).toBe(undefined);
 });
+
+test("empty string", () => {
+  expect(ruledValidate(null, [{ type: "string", rejectEmpty: false, failText: "empty" }])).toBe("empty");
+  expect(ruledValidate(null, [{ type: "string", rejectEmpty: true, failText: "empty" }])).toBe("empty");
+  expect(ruledValidate(null, [{ type: "string", rejectBlank: true, failText: "empty" }])).toBe("empty");
+
+  expect(ruledValidate("", [{ type: "string", rejectEmpty: false, failText: "empty" }])).toBe(undefined);
+  expect(ruledValidate("", [{ type: "string", rejectEmpty: true, failText: "empty" }])).toBe("empty");
+  expect(ruledValidate("  ", [{ type: "string", rejectEmpty: true, failText: "empty" }])).toBe(undefined);
+  expect(ruledValidate("  ", [{ type: "string", rejectBlank: true, failText: "empty" }])).toBe("empty");
+  expect(ruledValidate("1", [{ type: "string", rejectBlank: true, failText: "empty" }])).toBe(undefined);
+});
+
+test("empty blank", () => {
+  expect(ruledValidate(null, [{ type: "array", rejectEmpty: false, failText: "empty" }])).toBe("empty");
+  expect(ruledValidate(null, [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe("empty");
+
+  expect(ruledValidate([], [{ type: "array", rejectEmpty: false, failText: "empty" }])).toBe(undefined);
+  expect(ruledValidate([], [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe("empty");
+
+  expect(ruledValidate([1], [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe(undefined);
+  expect(ruledValidate([undefined], [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe(undefined);
+  expect(ruledValidate([""], [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe(undefined);
+});
