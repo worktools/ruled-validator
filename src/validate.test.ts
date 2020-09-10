@@ -67,6 +67,20 @@ test("number", () => {
   expect(ruledValidate(1, numberRules)).toBe("too small");
   expect(ruledValidate(11, numberRules)).toBe("too large");
   expect(ruledValidate(7, numberRules)).toBe("cant be 7");
+
+  let numberBound: RuledRules = [
+    {
+      type: "number",
+      failText: undefined,
+      next: [
+        { type: "max", n: 10, rejectEqual: true, failText: "too large" },
+        { type: "min", n: 5, rejectEqual: true, failText: "too small" },
+      ],
+    },
+  ];
+  expect(ruledValidate(7, numberBound)).toBe(undefined);
+  expect(ruledValidate(5, numberBound)).toBe("too small");
+  expect(ruledValidate(10, numberBound)).toBe("too large");
 });
 
 test("array", () => {
@@ -196,4 +210,44 @@ test("empty array", () => {
 test("fail with undefined", () => {
   expect(ruledValidate(null, [{ type: "string", failText: undefined }])).toBe(undefined);
   expect(ruledValidate(1, [{ type: "string", failText: undefined }])).toBe(undefined);
+});
+
+test("reject equal", () => {
+  expect(ruledValidate(10, [{ type: "number", failText: undefined, next: [{ type: "max", n: 10, failText: "too large" }] }])).toBe(undefined);
+  expect(ruledValidate(10, [{ type: "number", failText: undefined, next: [{ type: "max", n: 10, rejectEqual: true, failText: "too large" }] }])).toBe(
+    "too large"
+  );
+
+  expect(ruledValidate(10, [{ type: "number", failText: undefined, next: [{ type: "min", n: 10, failText: "too small" }] }])).toBe(undefined);
+  expect(ruledValidate(10, [{ type: "number", failText: undefined, next: [{ type: "min", n: 10, rejectEqual: true, failText: "too small" }] }])).toBe(
+    "too small"
+  );
+});
+
+test("email", () => {
+  let emailRules: RuledRules = [{ type: "string", failText: undefined, next: [{ type: "email", failText: "not email" }] }];
+  expect(ruledValidate("a", emailRules)).toBe("not email");
+  expect(ruledValidate("a@c.2", emailRules)).toBe("not email");
+  expect(ruledValidate("@qq.com", emailRules)).toBe("not email");
+
+  expect(ruledValidate("a@qq.com", emailRules)).toBe(undefined);
+  expect(ruledValidate("a.a@qq.com", emailRules)).toBe(undefined);
+  expect(ruledValidate("a-b@qq.com", emailRules)).toBe(undefined);
+  expect(ruledValidate("a0@gmail.com", emailRules)).toBe(undefined);
+  expect(ruledValidate("a.2@gmail.com", emailRules)).toBe(undefined);
+});
+
+test("non chinese", () => {
+  let nonChineseRule: RuledRules = [{ type: "string", failText: undefined, next: [{ type: "non-chinese", failText: "need ascii" }] }];
+  expect(ruledValidate("中文", nonChineseRule)).toBe("need ascii");
+  expect(ruledValidate("a", nonChineseRule)).toBe(undefined);
+  expect(ruledValidate("。", nonChineseRule)).toBe("need ascii");
+  expect(ruledValidate("，", nonChineseRule)).toBe("need ascii");
+  expect(ruledValidate(",", nonChineseRule)).toBe(undefined);
+
+  let nonChineseButPuncRule: RuledRules = [
+    { type: "string", failText: undefined, next: [{ type: "non-chinese", allowPunctuations: true, failText: "need ascii" }] },
+  ];
+  expect(ruledValidate("。", nonChineseButPuncRule)).toBe(undefined);
+  expect(ruledValidate("，", nonChineseButPuncRule)).toBe(undefined);
 });

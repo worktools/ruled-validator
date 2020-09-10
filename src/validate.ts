@@ -9,7 +9,7 @@ interface RuledString {
   rejectEmpty?: boolean;
   rejectBlank?: boolean;
   failText: string;
-  next?: (RuledStringMinLength | RuledStringMaxLength | RuledStringRegex | RuledRegistered | RuledByFn<string>)[];
+  next?: (RuledStringMinLength | RuledStringMaxLength | RuledStringRegex | RuledRegistered | RuledStringEmail | RuledStringNonChinese | RuledByFn<string>)[];
 }
 
 interface RuledStringMaxLength {
@@ -27,6 +27,17 @@ interface RuledStringMinLength {
 interface RuledStringRegex {
   type: "regex";
   regex: RegExp;
+  failText: string;
+}
+
+interface RuledStringNonChinese {
+  type: "non-chinese";
+  allowPunctuations?: boolean;
+  failText: string;
+}
+
+interface RuledStringEmail {
+  type: "email";
   failText: string;
 }
 
@@ -57,12 +68,14 @@ interface RuledBoolean {
 interface RuledNumberMax {
   type: "max";
   n: number;
+  rejectEqual?: boolean;
   failText: string;
 }
 
 interface RuledNumberMin {
   type: "min";
   n: number;
+  rejectEqual?: boolean;
   failText: string;
 }
 
@@ -110,6 +123,30 @@ let ruledValidateStringRegex = (x: string, rule: RuledStringRegex): string => {
   }
 };
 
+// https://stackoverflow.com/a/46181/883571
+let emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+let ruledValidateStringEmail = (x: string, rule: RuledStringEmail): string => {
+  if (!emailPattern.test(x)) {
+    return rule.failText;
+  }
+};
+
+// https://stackoverflow.com/a/21113538/883571
+let chinesePattern = /[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]/;
+let chinesePuncPattern = /[\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|\u201c|\u201d|\u2018|\u2019|\uff08|\uff09|\u300a|\u300b|\u3008|\u3009|\u3010|\u3011|\u300e|\u300f|\u300c|\u300d|\ufe43|\ufe44|\u3014|\u3015|\u2026|\u2014|\uff5e|\ufe4f|\uffe5]/;
+
+let ruledValidateStringNonChinese = (x: string, rule: RuledStringNonChinese): string => {
+  if (chinesePattern.test(x)) {
+    return rule.failText;
+  }
+  if (chinesePuncPattern.test(x)) {
+    if (rule.allowPunctuations !== true) {
+      return rule.failText;
+    }
+  }
+};
+
 let ruledValidateString = (x: any, rule: RuledString): string => {
   if (typeof x !== "string") {
     return rule.failText;
@@ -150,6 +187,20 @@ let ruledValidateString = (x: any, rule: RuledString): string => {
           }
           break;
         }
+        case "non-chinese": {
+          let result = ruledValidateStringNonChinese(x, childRule);
+          if (result != null) {
+            return result;
+          }
+          break;
+        }
+        case "email": {
+          let result = ruledValidateStringEmail(x, childRule);
+          if (result != null) {
+            return result;
+          }
+          break;
+        }
         case "registered": {
           let result = ruledValidateRegistered(x, childRule);
           if (result != null) {
@@ -176,11 +227,21 @@ let ruledValidateNumberMax = (x: number, rule: RuledNumberMax): string => {
   if (x > rule.n) {
     return rule.failText;
   }
+  if (rule.rejectEqual) {
+    if (x === rule.n) {
+      return rule.failText;
+    }
+  }
 };
 
 let ruledValidateNumberMin = (x: number, rule: RuledNumberMin): string => {
   if (x < rule.n) {
     return rule.failText;
+  }
+  if (rule.rejectEqual) {
+    if (x === rule.n) {
+      return rule.failText;
+    }
   }
 };
 let ruledValidateNumber = (x: string, rule: RuledNumber): string => {
