@@ -181,7 +181,7 @@ test("empty string", () => {
   expect(ruledValidate("1", [{ type: "string", rejectBlank: true, failText: "empty" }])).toBe(undefined);
 });
 
-test("empty blank", () => {
+test("empty array", () => {
   expect(ruledValidate(null, [{ type: "array", rejectEmpty: false, failText: "empty" }])).toBe("empty");
   expect(ruledValidate(null, [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe("empty");
 

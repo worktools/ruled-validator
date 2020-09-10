@@ -6,6 +6,12 @@
 
 ![](https://img.shields.io/npm/v/@jimengio/ruled-validator.svg?style=flat-square)
 
+```bash
+yarn add @jimengio/ruled-validator
+```
+
+`ruledValidate(x, rules)` returns a string for a failure, returns `undefined` for ok.
+
 ```ts
 import { RuledRules, ruledValidate } from "@jimengio/ruled-validator";
 
@@ -22,7 +28,7 @@ let stringLengthRules: RuledRules = [
   },
 ];
 
-ruledValidate("1", stringLengthRules); // string | undefined
+expect(ruledValidate("1", stringLengthRules)).toBe("too short");
 ```
 
 In app level, use `registerRuledValidatorRule` to create rules in `registered` type for custom quick validations.
