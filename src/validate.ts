@@ -104,7 +104,8 @@ interface RuledRegistered {
   failText: string;
 }
 
-export type RuledRules = (RuledRequired | RuledByFn | RuledString | RuledNumber | RuledBoolean | RuledArray | RuledObject | RuledRegistered)[];
+export type RuledRuleEntry = RuledRequired | RuledByFn | RuledString | RuledNumber | RuledBoolean | RuledArray | RuledObject | RuledRegistered;
+export type RuledRules = RuledRuleEntry[];
 
 let ruledValidateStringMaxLength = (x: string, rule: RuledStringMaxLength): string => {
   if (x.length > rule.n) {
@@ -451,7 +452,10 @@ let ruledValidateRegistered = (x: any, rule: RuledRegistered): string => {
   }
 };
 
-export let ruledValidate = (x: any, rules: RuledRules) => {
+export let ruledValidate = (x: any, rules: RuledRules | RuledRuleEntry): string => {
+  if (!Array.isArray(rules)) {
+    return ruledValidate(x, [rules]);
+  }
   for (let idx in rules) {
     let rule = rules[idx];
     switch (rule.type) {
