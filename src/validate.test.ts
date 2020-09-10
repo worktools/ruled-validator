@@ -192,3 +192,8 @@ test("empty array", () => {
   expect(ruledValidate([undefined], [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe(undefined);
   expect(ruledValidate([""], [{ type: "array", rejectEmpty: true, failText: "empty" }])).toBe(undefined);
 });
+
+test("fail with undefined", () => {
+  expect(ruledValidate(null, [{ type: "string", failText: undefined }])).toBe(undefined);
+  expect(ruledValidate(1, [{ type: "string", failText: undefined }])).toBe(undefined);
+});
