@@ -29,6 +29,43 @@ let stringLengthRules: RuledRuleEntry = {
 expect(ruledValidate("1", stringLengthRules)).toBe("too short");
 ```
 
+### Types
+
+Validation rules are not nested in an arbitrary ways. Notice the structure:
+
+| Top-level type | Sub type       | Options                | Usage                                      |
+| -------------- | -------------- | ---------------------- | ------------------------------------------ |
+| **string**     |                |                        |                                            |
+|                |                | `rejectEmpty`: boolean | treat `""` as invalid                      |
+|                |                | `rejectBlank`: boolean | treat `""` and `" "` as invalid            |
+|                | max-length     | `n`: number            |                                            |
+|                | min-length     | `n`: number            |                                            |
+|                | regex          | `regex`: RegExp        |                                            |
+|                | email          |                        |                                            |
+|                | non-chinese    |                        |                                            |
+|                | fn             | `test`: Function       |                                            |
+| **array**      |                |                        |                                            |
+|                |                | `rejectEmpty`: boolean | treat `[]` as invalid                      |
+|                | max-length     | `n`: number            |                                            |
+|                | min-length     | `n`: number            |                                            |
+|                | fn             | `test`: Function       |                                            |
+| **number**     |                |                        |                                            |
+|                | max            | `n`: number            |                                            |
+|                |                | `rejectEqual`: boolean | treat `n` as invalid                       |
+|                | min            | `n`: number            |                                            |
+|                |                | `rejectEqual`: boolean | treat `n` as invalid                       |
+|                | fn             | `test`: Function       |                                            |
+| **object**     |                |                        |                                            |
+|                | fn             | `test`: Function       |                                            |
+| **boolean**    |                |                        |                                            |
+| **required**   | _all types..._ |                        | this is special, most times can be omitted |
+| **fn**         |                | `test`: Function       | custom validation funcion, returns boolean |
+| **registered** |                |                        |                                            |
+|                |                | `name`: string         |                                            |
+|                |                | `options`: object      |                                            |
+
+### Registered type
+
 In app level, use `registerRuledValidatorRule` to create rules in `registered` type for custom quick validations.
 
 ```ts
