@@ -1,6 +1,6 @@
 {
   "name": "@jimengio/ruled-validator",
-  "version": "0.1.1-a1",
+  "version": "0.1.1",
   "description": "",
   "main": "lib/validate.js",
   "scripts": {
