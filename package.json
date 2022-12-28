@@ -1,6 +1,6 @@
 {
-  "name": "@jimengio/ruled-validator",
-  "version": "0.1.1",
+  "name": "@worktools/ruled-validator",
+  "version": "0.1.0-a1",
   "description": "",
   "main": "lib/validate.js",
   "scripts": {
@@ -9,13 +9,13 @@
     "compile": "rm -rfv lib/* && tsc -d --project tsconfig-compile.json --outDir lib/"
   },
   "keywords": [],
-  "author": "jimengio",
+  "author": "tiye",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^26.0.13",
     "jest": "^26.4.2",
     "ts-jest": "^26.3.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.9.4"
   },
   "dependencies": {}
 }
